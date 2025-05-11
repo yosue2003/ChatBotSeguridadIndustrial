@@ -1,0 +1,43 @@
+/* Estilos del contenedor principal del chat */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #fff;
+    border-left: 1px solid #e5e7eb;
+}
+
+.chat-window {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #f9fafb;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+.chat-window::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-window::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-window::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 3px;
+}
+
+/* Modo oscuro */
+:root.dark .chat-container {
+    background-color: #1f2937;
+    border-left-color: #374151;
+}
+
+:root.dark .chat-window {
+    background-color: #111827;
+}
+
+:root.dark .chat-window::-webkit-scrollbar-thumb {
+    background-color: #4b5563;
+}
