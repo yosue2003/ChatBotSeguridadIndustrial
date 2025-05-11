@@ -1,0 +1,76 @@
+.chat-input-form {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: #fff;
+    border-top: 1px solid #e5e7eb;
+}
+
+.chat-input-form input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.chat-input-form input:focus {
+    border-color: #003366;
+}
+
+.chat-input-form input:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+}
+
+.chat-input-form button {
+    padding: 0.75rem 1.5rem;
+    background-color: #FFD700;
+    color: #003366;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.chat-input-form button:hover:not(:disabled) {
+    background-color: #003366;
+    color: #FFD700;
+}
+
+.chat-input-form button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #e5e7eb;
+    color: #9ca3af;
+}
+
+/* Modo Oscuro */
+:root.dark .chat-input-form {
+    background-color: #1f2937;
+    border-top-color: #374151;
+}
+
+:root.dark .chat-input-form input {
+    background-color: #111827;
+    border-color: #374151;
+    color: #e5e7eb;
+}
+
+:root.dark .chat-input-form input:disabled {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #6b7280;
+}
+
+:root.dark .chat-input-form input:focus {
+    border-color: #FFD700;
+}
+
+:root.dark .chat-input-form button:disabled {
+    background-color: #374151;
+    color: #6b7280;
+}

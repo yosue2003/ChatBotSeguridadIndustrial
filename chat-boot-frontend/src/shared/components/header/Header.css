@@ -1,0 +1,39 @@
+.header-chat-page {
+    background-color: #002855;
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 20;
+    transition: background-color 0.3s ease;
+}
+
+:root.dark .header-chat-page {
+    background-color: #111827;
+    border-bottom: 1px solid #374151;
+}
+
+.hamburger-menu,
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hamburger-menu:hover,
+.theme-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-toggle {
+    color: #FFD700;
+}
