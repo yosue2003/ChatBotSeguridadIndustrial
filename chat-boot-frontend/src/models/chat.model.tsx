@@ -31,4 +31,7 @@ export interface ChatContextType {
     startNewConversation: (topicId?: number) => void;
     loadConversation: (conversationId: number) => void;
     loading: boolean;
+    deleteConversation: (conversationId: number) => void;
+    deleteAllConversations: () => void;
+
 }

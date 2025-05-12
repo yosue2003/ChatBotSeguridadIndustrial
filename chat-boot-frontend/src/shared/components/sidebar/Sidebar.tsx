@@ -2,7 +2,7 @@ import { useState} from 'react'
 
 import { FiBookOpen } from "react-icons/fi";
 import { FaPlus } from "react-icons/fa6";
-import { FaChevronRight, FaChevronDown, FaHistory } from "react-icons/fa";
+import { FaChevronRight, FaChevronDown, FaHistory, FaTrash } from "react-icons/fa";
 import { useChat } from '../../../context/chatContext';
 import './sidebar.css'
 
@@ -15,6 +15,8 @@ const SidebarChat = () => {
         startNewConversation,
         loadConversation,
         currentConversation,
+        deleteConversation,
+        deleteAllConversations,
     } = useChat() 
     const [isTopicsOpen, setIsTopicsOpen] = useState(true)
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
@@ -126,18 +128,39 @@ const SidebarChat = () => {
                             No hay conversaciones previas
                         </p>
                         ) : (
-                        <ul className="conversation-list">
-                            {conversations.map((conversation) => (
-                            <li key={conversation.id}>
+                        <>
+                            <div className="sidebar-button-container">
                                 <button
-                                onClick={() => loadConversation(conversation.id)}
-                                className={`conversation-item ${currentConversation?.id === conversation.id ? 'active-conversation' : ''}`}
+                                onClick={() => deleteAllConversations()}
+                                className="new-chat-button"
                                 >
-                                {conversation.title}
+                                <FaTrash size={18} />
+                                <span>Eliminar todo</span>
                                 </button>
-                            </li>
-                            ))}
-                        </ul>
+                            </div>
+                            <ul className="conversation-list">
+                                {conversations.map((conversation) => (
+                                <li key={conversation.id}>
+                                    <button
+                                        onClick={() => loadConversation(conversation.id)}
+                                        className={`conversation-item ${currentConversation?.id === conversation.id ? 'active-conversation' : ''}`}
+                                    >
+                                        <span>{conversation.title}</span>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteConversation(conversation.id);
+                                            }}
+                                            className="delete-button"
+                                            title="Eliminar conversación"
+                                        >
+                                            <FaTrash size={12} />
+                                        </button>
+                                    </button>
+                                </li>
+                                ))}
+                            </ul>
+                        </>
                         )}
                     </div>
                     )}

@@ -171,22 +171,85 @@
     transition: all 0.3s ease;
     position: relative;
     cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .conversation-item:hover:not(.active-conversation) {
     background-color: #E8EBF0;
     transform: translateX(4px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-left: 2px solid #2d3748;
 }
 
 .conversation-item.active-conversation {
     background-color: #E8EBF0;
     transform: translateX(4px);
-    box-shadow: 0 1px 2px  rgba(0, 0, 0, 0.219);
-    border-left: 2px solid   #2d3748;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.219);
+    border-left: 2px solid #2d3748;
 }
 
-/* Empty History */
+.conversation-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.delete-button {
+    opacity: 0;
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+    min-width: 24px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.conversation-item:hover .delete-button {
+    opacity: 1;
+}
+
+.delete-button:hover {
+    background-color: #dc2626;
+    color: white;
+}
+
+/* Dark mode styles */
+:root.dark .conversation-item {
+    color: #e5e7eb;
+}
+
+:root.dark .conversation-item:hover:not(.active-conversation) {
+    background-color: #2d3748;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border-left: 2px solid #FFD700;
+}
+
+:root.dark .conversation-item.active-conversation {
+    background-color: #2d3748;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border-left: 2px solid #FFD700;
+}
+
+:root.dark .delete-button {
+    color: #9ca3af;
+}
+
+:root.dark .delete-button:hover {
+    background-color: #991b1b;
+    color: white;
+}
+
 .empty-history {
     font-size: 0.875rem;
     color: #6b7280; 
@@ -194,12 +257,11 @@
     padding: 0.5rem 0.75rem;
 }
 
-/* Spacer */
+
 .flex-grow {
     flex-grow: 1;
 }
 
-/* Safety Info */
 .safety-container {
     padding: 1rem;
     border-top: 1px solid var(--border, #e2e8f0);

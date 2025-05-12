@@ -5,7 +5,10 @@ import './ChatInput.css';
 
 const ChatInput = () => {
     const [inputMessage, setInputMessage] = useState('');
-    const { sendMessage } = useChat();
+    const { 
+        sendMessage, 
+        //currentConversation, 
+        loading } = useChat();
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -23,10 +26,11 @@ const ChatInput = () => {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Escribe tu mensaje aquí..."
+                //disabled={!currentConversation || loading}
             />
             <button 
                 type="submit" 
-                disabled={!inputMessage.trim()}
+                disabled={!inputMessage.trim() || loading}
             >
                 Enviar
             </button>

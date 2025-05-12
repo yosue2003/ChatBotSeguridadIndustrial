@@ -6,20 +6,21 @@ import WelcomeScreen from './Welcome';
 
 
 const ChatMessages = () => {
-    const { messages, currentConversation, loading } = useChat();
+    const { messages = [], currentConversation, loading } = useChat();
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    if (!currentConversation) {
+    // Si no hay conversación activa, mostrar la pantalla de bienvenida
+    if (!currentConversation && messages.length === 0) {
         return <WelcomeScreen />;
     }
 
     return (
         <div className="chat-messages">
-            {messages.map((message) => (
+            {messages && messages.map((message) => (
                 <ChatMessage
                     key={message.id}
                     message={{

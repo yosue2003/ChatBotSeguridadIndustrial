@@ -1,41 +1,41 @@
 import { useState, useEffect } from 'react';
-import { Message, Conversation, Topic } from '../models/chat.model';
-import { mockMessages, mockTopics } from '../data/mockData';
-import {
-    generateAIResponse,
-    getNextMessageId,
-    getNextConversationId,
-    createUserMessage,
-    createAIMessage,
-    createNewConversation
-} from '../shared/utils/chatUtils';
+import type { Message, Conversation, Topic } from '../models/chat.model';
+import { ChatService } from '../services/app.services';
 
 export const useChatActions = () => {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
-    const [topics, setTopics] = useState<Topic[]>(mockTopics);
+    const [topics, setTopics] = useState<Topic[]>([]);
     const [recommendedTopics, setRecommendedTopics] = useState<Topic[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(false);
+    const userId = 1;
 
-    // Cargar conversaciones desde datos mock
+    // Cargar temas al inicio
     useEffect(() => {
-        const userConversations = mockMessages.reduce((convs: Conversation[], msg) => {
-            const existingConv = convs.find((c) => c.id === msg.conversationId);
-            if (existingConv) {
-                existingConv.messages.push(msg);
-                return convs;
+        const loadTopics = async () => {
+            try {
+                const fetchedTopics = await ChatService.getTopics();
+                setTopics(fetchedTopics);
+                setRecommendedTopics(fetchedTopics.slice(0, 3));
+            } catch (error) {
+                console.error('Error al cargar temas:', error);
             }
-            const newConv: Conversation = {
-                id: msg.conversationId,
-                userId: msg.senderId,
-                title: `Conversation ${msg.conversationId}`,
-                createdAt: msg.timestamp,
-                messages: [msg],
-            };
-            return [...convs, newConv];
-        }, []);
-        setConversations(userConversations);
+        };
+        loadTopics();
+    }, []);
+
+    // Cargar conversaciones del usuario al inicio
+    useEffect(() => {
+        const loadConversations = async () => {
+            try {
+                const fetchedConversations = await ChatService.getUserConversations(userId);
+                setConversations(fetchedConversations);
+            } catch (error) {
+                console.error('Error al cargar conversaciones:', error);
+            }
+        };
+        loadConversations();
     }, []);
 
     // Actualizar mensajes cuando cambia la conversación
@@ -48,115 +48,162 @@ export const useChatActions = () => {
     }, [currentConversation]);
 
     const sendMessage = async (content: string) => {
-        if (!currentConversation) {
-            const newId = getNextConversationId(conversations);
-            const title = content.length > 30 ? content.substring(0, 30) + '...' : content;
+        try {
+            setLoading(true);
             
-            const userMessage = createUserMessage(content, newId, 1);
-            const aiMessage = createAIMessage(
-                "¡Hola! Soy SafetyBot, tu asistente en temas de seguridad industrial. ¿En qué puedo ayudarte hoy?",
-                newId,
-                2
-            );
-
-            const updatedMessages = [userMessage, aiMessage];
-            const finalConversation = createNewConversation(newId, title, updatedMessages);
-
-            setMessages(updatedMessages);
-            setCurrentConversation(finalConversation);
-            setConversations(prev => [...prev, finalConversation]);
-            return;
-        }
-
-        setLoading(true);
-        const newUserMessage = createUserMessage(
-            content,
-            currentConversation.id,
-            getNextMessageId(messages, conversations)
-        );
-
-        const updatedMessages = [...messages, newUserMessage];
-        const isFirstUserMessage = messages.every(m => m.isAI);
-        const shouldUpdateTitle = isFirstUserMessage && !currentConversation.title.startsWith('Sobre:');
-
-        const updatedCurrentConversation = {
-            ...currentConversation,
-            messages: updatedMessages,
-            title: shouldUpdateTitle 
-                ? (content.length > 30 ? content.substring(0, 30) + '...' : content)
-                : currentConversation.title
-        };
-
-        const updatedConversations = conversations.map((conv) =>
-            conv.id === currentConversation.id ? updatedCurrentConversation : conv
-        );
-
-        setMessages(updatedMessages);
-        setCurrentConversation(updatedCurrentConversation);
-        setConversations(updatedConversations);
-
-        // Simular respuesta del bot
-        setTimeout(() => {
-            const aiResponse = createAIMessage(
-                generateAIResponse(content),
-                currentConversation.id,
-                getNextMessageId(updatedMessages, conversations)
-            );
-
-            const finalMessages = [...updatedMessages, aiResponse];
-            const finalConversation = {
-                ...updatedCurrentConversation,
-                messages: finalMessages,
+            // Creamos un mensaje temporal del usuario
+            const userMessage: Message = {
+                id: Date.now(), // ID temporal
+                conversationId: currentConversation?.id || 0,
+                senderId: userId,
+                isAI: false,
+                content: content,
+                timestamp: new Date().toISOString()
             };
+            
+            // Añadimos inmediatamente el mensaje del usuario a la UI
+            setMessages(prev => [...prev, userMessage]);
 
-            const finalConversations = updatedConversations.map((conv) =>
-                conv.id === currentConversation.id ? finalConversation : conv
+            const response = await ChatService.sendMessage(
+                content,
+                currentConversation?.id,
+                undefined 
             );
 
-            setMessages(finalMessages);
-            setCurrentConversation(finalConversation);
-            setConversations(finalConversations);
-            setLoading(false);
-        }, 1000);
-    };
-
-    const startNewConversation = (topicId?: number) => {
-        const newId = getNextConversationId(conversations);
-        const title = topicId 
-            ? `Sobre: ${topics.find((t) => t.id === topicId)?.name ?? 'Tema nuevo'}` 
-            : 'Nueva conversación';
-
-        let initialMessages: Message[] = [];
-        if (topicId) {
-            const topic = topics.find((t) => t.id === topicId);
-            if (topic) {
-                initialMessages = [createAIMessage(
-                    `Bienvenido a la conversación sobre ${topic.name}. ¿En qué puedo ayudarte respecto a este tema?`,
-                    newId,
-                    1
-                )];
+            if (!currentConversation) {
+                // Si es una nueva conversación, usar el primer mensaje como título
+                const newConversation = {
+                    ...response.conversation,
+                    title: content.length > 30 ? content.substring(0, 30) + '...' : content
+                };
+                setCurrentConversation(newConversation);
+                setConversations(prev => [...prev, newConversation]);
+            } else {
+                const updatedConversation = {
+                    ...currentConversation,
+                    messages: [...currentConversation.messages, userMessage, response.message]
+                };
+                setCurrentConversation(updatedConversation);
+                setConversations(prev =>
+                    prev.map(conv =>
+                        conv.id === currentConversation.id ? updatedConversation : conv
+                    )
+                );
             }
-        } else {
-            initialMessages = [createAIMessage(
-                "¡Hola! Soy SafetyBot, tu asistente en temas de seguridad industrial. ¿En qué puedo ayudarte hoy?",
-                newId,
-                1
-            )];
+            
+            // Actualizamos los mensajes con la respuesta del bot
+            setMessages(prev => [...prev, response.message]);
+        } catch (error) {
+            console.error('Error al enviar mensaje:', error);
+        } finally {
+            setLoading(false);
         }
-
-        const newConversation = createNewConversation(newId, title, initialMessages);
-        const updatedConversations = [...conversations, newConversation];
-        
-        setConversations(updatedConversations);
-        setCurrentConversation(newConversation);
-        setMessages(newConversation.messages);
     };
 
-    const loadConversation = (conversationId: number) => {
-        const conversation = conversations.find((c) => c.id === conversationId);
-        if (conversation) {
+    const startNewConversation = async (topicId?: number) => {
+        try {
+            setLoading(true);
+            setMessages([]); // Clear current messages
+            
+            // Default welcome message or topic-specific message
+            let welcomeMessage = {
+                id: Date.now(),
+                conversationId: 0,
+                senderId: 0, // System/AI sender
+                isAI: true,
+                content: "¡Hola! Soy SAFEMIND 1.0. ¿En qué tema de seguridad industrial puedo ayudarte hoy?",
+                timestamp: new Date().toISOString()
+            };
+    
+            // If topic selected, customize welcome message
+            if (topicId) {
+                const topic = topics.find(t => t.id === topicId);
+                if (topic) {
+                    welcomeMessage.content = `¡Hola! Soy SAFEMIND 1.0. Me gustaría proporcionarte información sobre ${topic.name}. ¿Qué te gustaría saber específicamente?`;
+                }
+            }
+            
+            // Show welcome message immediately to avoid UI delay
+            setMessages([welcomeMessage]);
+    
+            try {
+                // Send the welcome message to backend
+                const initialResponse = await ChatService.sendMessage(
+                    welcomeMessage.content, 
+                    undefined, 
+                    topicId
+                );
+                
+                // Update with server response
+                if (initialResponse && initialResponse.conversation) {
+                    // Get server-generated message/conversation IDs
+                    welcomeMessage = initialResponse.message || welcomeMessage;
+                    
+                    // Update conversation state with server response
+                    setCurrentConversation(initialResponse.conversation);
+                    setConversations(prev => [...prev, initialResponse.conversation]);
+                    
+                    // Ensure messages are updated with server response
+                    setMessages([welcomeMessage]);
+                } else {
+                    // Handle case where server doesn't return expected data
+                    console.error('Respuesta del servidor incompleta');
+                }
+            } catch (apiError) {
+                console.error('Error en la comunicación con el servidor:', apiError);
+                // Keep the local welcome message if server request fails
+                // This ensures user sees something even if API fails
+            }
+        } catch (error) {
+            console.error('Error al iniciar nueva conversación:', error);
+            // Show error message to user
+            setMessages([{
+                id: Date.now(),
+                conversationId: 0,
+                senderId: 0,
+                isAI: true,
+                content: "Lo siento, el servicio está tardando demasiado en responder. Por favor, intenta nuevamente.",
+                timestamp: new Date().toISOString()
+            }]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadConversation = async (conversationId: number) => {
+        try {
+            const conversation = await ChatService.getConversation(conversationId);
             setCurrentConversation(conversation);
             setMessages(conversation.messages);
+        } catch (error) {
+            console.error('Error al cargar conversación:', error);
+        }
+    };
+
+    const deleteConversation = async (conversationId: number) => {
+        try {
+            await ChatService.deleteConversation(conversationId);
+            
+            if (currentConversation?.id === conversationId) {
+                setCurrentConversation(null);
+                setMessages([]);
+            }
+
+            setConversations(prev => prev.filter(conv => conv.id !== conversationId));
+        } catch (error) {
+            console.error('Error al eliminar la conversación:', error);
+        }
+    };
+
+    const deleteAllConversations = async () => {
+        try {
+            await ChatService.deleteAllUserConversations(userId);
+            
+            setCurrentConversation(null);
+            setMessages([]);
+            setConversations([]);
+        } catch (error) {
+            console.error('Error al eliminar todas las conversaciones:', error);
         }
     };
 
@@ -169,6 +216,8 @@ export const useChatActions = () => {
         loading,
         sendMessage,
         startNewConversation,
-        loadConversation
+        loadConversation,
+        deleteConversation,
+        deleteAllConversations
     };
 };
