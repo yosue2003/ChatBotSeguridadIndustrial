@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     
     OPENAI_API_KEY: str
     OPENAI_API_URL: str
-    OPENAI_MODEL: str = "deepseek/deepseek-r1:free"
+    OPENAI_MODEL: str = "deepseek/deepseek-r1-zero:free"
     
     MAX_RETRIES: int = 3
     RETRY_MIN_WAIT: float = 4
