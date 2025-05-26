@@ -139,9 +139,8 @@ const SidebarChat = () => {
                                 </button>
                             </div>
                             <ul className="conversation-list">
-                                {conversations.map((conversation) => (
-                                <li key={conversation.id}>
-                                    <button
+                                {conversations.map((conversation) => (                                <li key={conversation.id}>
+                                    <div
                                         onClick={() => loadConversation(conversation.id)}
                                         className={`conversation-item ${currentConversation?.id === conversation.id ? 'active-conversation' : ''}`}
                                     >
@@ -156,7 +155,7 @@ const SidebarChat = () => {
                                         >
                                             <FaTrash size={12} />
                                         </button>
-                                    </button>
+                                    </div>
                                 </li>
                                 ))}
                             </ul>

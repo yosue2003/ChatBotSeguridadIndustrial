@@ -11,7 +11,7 @@ const ChatHeader = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
             <button className="hamburger-menu" onClick={toggleSidebar}>
                 <TiThMenuOutline size={18}/>
             </button>
-            <h1>SAFEMIND 1.0</h1>
+            <h1>Guardian Simon</h1>
             <button onClick={toggleTheme} className="theme-toggle">
                 {isDarkMode ? <BsSun size={18} /> : <BsMoonFill size={18} />}
             </button>

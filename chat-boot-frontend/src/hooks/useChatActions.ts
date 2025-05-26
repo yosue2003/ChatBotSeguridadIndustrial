@@ -111,7 +111,7 @@ export const useChatActions = () => {
                 conversationId: 0,
                 senderId: 0, // System/AI sender
                 isAI: true,
-                content: "¡Hola! Soy SAFEMIND 1.0. ¿En qué tema de seguridad industrial puedo ayudarte hoy?",
+                content: "¡Hola! Soy Guardian Simon ¿En qué tema de seguridad industrial puedo ayudarte hoy?",
                 timestamp: new Date().toISOString()
             };
     
